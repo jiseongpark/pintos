@@ -1,0 +1,26 @@
+FAIL
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (args) begin
+  (args) argc = 2
+  (args) argv[0] = 'args-single'
+  (args) argv[1] = 'onearg'
+  (args) argv[2] = null
+  (args) end
+  args-single: exit(0)
+Differences in `diff -u' format:
++ EXIT : 0
++ TID2 : 2
++ TID1 : 3
++ #################33
++ TID2 : 3
++ TID1 : 3
++ !!!!!!!!!!!!!!!!
+  (args) begin
+  (args) argc = 2
+  (args) argv[0] = 'args-single'
+  (args) argv[1] = 'onearg'
+  (args) argv[2] = null
+  (args) end
+  args-single: exit(0)
