@@ -167,7 +167,7 @@ void syscall_exit(int status)
 	printf("exit(%d)\n", status);
 	thread_current()->exit_status = status;
 	list_remove(&thread_current()->elem);
-	thread_current()->parent->child_num -= 1;
+  	thread_current()->parent->child_num -= 1;
 	process_exit();
 }
 

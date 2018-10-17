@@ -1,5 +1,2 @@
 FAIL
-Kernel panic in run: PANIC at ../../lib/kernel/list.c:84 in list_next(): assertion `is_head (elem) || is_interior (elem)' failed.
-Call stack: 0xc024cee4
-Translation of call stack:
-0xc024cee4: (unknown)
+run: after run 1/10, expected depth 61, actual depth 21.: FAILED

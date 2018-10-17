@@ -96,11 +96,6 @@ start_process (void *f_name)
   palloc_free_page (file_name);
   if (!success) {
     parent->executable = 1;
-    sema_up(&thread_current()->parent->sema);
-    thread_exit();
-  }else{
-    // printf("STARTP SEMA UP BY TID : %d\n", thread_current()->tid);
-    sema_up(&thread_current()->parent->sema);
   }
 
 
@@ -169,8 +164,7 @@ process_wait (tid_t child_tid UNUSED)
   // if(flag == 1) 
   sema_down(&parent->sema);
 
-  list_remove(e);
-  parent->child_num -= 1;
+  
 
   if(flag == 0 || flag == 2){
     return -1;
@@ -232,11 +226,12 @@ process_exit (void)
   // }else{
   //   printf("%s\n", thread_current()->exec);
   // }
+  sema_up(&parent->sema);
   // filesys_remove(thread_current()->exec);
-  file_close(thread_current()->parent->file);
+  // file_close(thread_current()->parent->file);
   free(thread_current()->exec);
   // printf("proc_exit : SEMA UP BY TID %d\n", thread_current()->tid);
-  sema_up(&parent->sema);
+  
   
   thread_exit();  
 }
@@ -355,8 +350,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
   fn_copy = (char *)malloc(strlen(file_name) + 1);
   strlcpy(fn_copy, file_name, strlen(file_name) + 1);
   real_file = strtok_r(fn_copy, " ", &save_ptr);
-  // char * temp = (char*)malloc(sizeof(real_file) + 1);
-  // strlcpy(temp, real_file, sizeof(real_file) + 1);  
+  char * temp = (char*)malloc(sizeof(real_file) + 1);
+  strlcpy(temp, real_file, sizeof(real_file) + 1);  
   
   /* Open executable file. */
   
@@ -465,15 +460,16 @@ load (const char *file_name, void (**eip) (void), void **esp)
   
   
  done:
+
   if(success){
     // printf("load : SEMA UP BY TID %d\n", thread_current()->tid);
-    // sema_up(&parent->sema);
+    sema_up(&parent->sema);
   }
       
   free(fn_copy);
   // printf("TEMP : %s\n", temp);
-  // file_close(file)
-  // free(temp);
+  filesys_remove(temp);
+  free(temp);
 
   return success;
 }
