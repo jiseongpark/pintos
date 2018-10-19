@@ -1,4 +1,4 @@
-TOTAL TESTING SCORE: 86.0%
+TOTAL TESTING SCORE: 90.0%
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -6,12 +6,12 @@ SUMMARY BY TEST SET
 
 Test Set                                      Pts Max  % Ttl  % Max
 --------------------------------------------- --- --- ------ ------
-tests/userprog/Rubric.functionality           100/108  32.4%/ 35.0%
-tests/userprog/Rubric.robustness               83/ 88  23.6%/ 25.0%
+tests/userprog/Rubric.functionality           108/108  35.0%/ 35.0%
+tests/userprog/Rubric.robustness               88/ 88  25.0%/ 25.0%
 tests/userprog/no-vm/Rubric                     0/  1   0.0%/ 10.0%
 tests/filesys/base/Rubric                      30/ 30  30.0%/ 30.0%
 --------------------------------------------- --- --- ------ ------
-Total                                                  86.0%/100.0%
+Total                                                  90.0%/100.0%
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -21,7 +21,7 @@ Functionality of system calls (tests/userprog/Rubric.functionality):
 	- Test argument passing on Pintos command line.
 	     3/ 3 tests/userprog/args-none
 	     3/ 3 tests/userprog/args-single
-	  ** 0/ 3 tests/userprog/args-multiple
+	     3/ 3 tests/userprog/args-multiple
 	     3/ 3 tests/userprog/args-many
 	     3/ 3 tests/userprog/args-dbl-space
 
@@ -54,7 +54,7 @@ Functionality of system calls (tests/userprog/Rubric.functionality):
 
 	- Test "wait" system call.
 	     5/ 5 tests/userprog/wait-simple
-	  ** 0/ 5 tests/userprog/wait-twice
+	     5/ 5 tests/userprog/wait-twice
 
 	- Test "exit" system call.
 	     5/ 5 tests/userprog/exit
@@ -71,8 +71,8 @@ Functionality of system calls (tests/userprog/Rubric.functionality):
 	     3/ 3 tests/userprog/rox-multichild
 
 	- Section summary.
-	     26/ 28 tests passed
-	    100/108 points subtotal
+	     28/ 28 tests passed
+	    108/108 points subtotal
 
 Robustness of system calls (tests/userprog/Rubric.robustness):
 	- Test robustness of file descriptor handling.
@@ -111,7 +111,7 @@ Robustness of system calls (tests/userprog/Rubric.robustness):
 	     5/ 5 tests/userprog/sc-boundary-2
 
 	- Test robustness of "exec" and "wait" system calls.
-	  ** 0/ 5 tests/userprog/exec-missing
+	     5/ 5 tests/userprog/exec-missing
 	     5/ 5 tests/userprog/wait-bad-pid
 	     5/ 5 tests/userprog/wait-killed
 
@@ -124,8 +124,8 @@ Robustness of system calls (tests/userprog/Rubric.robustness):
 	     1/ 1 tests/userprog/bad-jump2
 
 	- Section summary.
-	     33/ 34 tests passed
-	     83/ 88 points subtotal
+	     34/ 34 tests passed
+	     88/ 88 points subtotal
 
 Functionality of features that VM might break (tests/userprog/no-vm/Rubric):
 
@@ -162,146 +162,23 @@ Functionality of base file system (tests/filesys/base/Rubric):
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-DETAILS OF tests/userprog/args-multiple FAILURE:
-
-run: TIMEOUT after 61 seconds of wall-clock time - load average: 0.51, 0.39, 0.40
-
-OUTPUT FROM tests/userprog/args-multiple:
-
-Copying tests/userprog/args-multiple into /tmp/H77xOzmN1u.dsk...
-Writing command line to /tmp/0RH8Lu3zn1.dsk...
-qemu -hda /tmp/0RH8Lu3zn1.dsk -hdb /tmp/NIC9dlUhDc.dsk -hdc /tmp/H77xOzmN1u.dsk -m 4 -net none -nographic -monitor null
-Kernel command line: -q -f put args-multiple run 'args-multiple some arguments for you!'
-Pintos booting with 4,088 kB RAM...
-373 pages available in kernel pool.
-373 pages available in user pool.
-Calibrating timer...  419,430,400 loops/s.
-hd0:0: detected 137 sector (68 kB) disk, model "QEMU HARDDISK", serial "QM00001"
-hd0:1: detected 4,032 sector (1 MB) disk, model "QEMU HARDDISK", serial "QM00002"
-hd1:0: detected 103 sector (51 kB) disk, model "QEMU HARDDISK", serial "QM00003"
-Formatting file system...done.
-Boot complete.
-Putting 'args-multiple' into the file system...
-Executing 'args-multiple some arguments for you!':
-(args) begin
-(args) argc = 5
-(args) argv[0] = 'args-multiple'
-(args) argv[1] = 'some'
-(args) argv[2] = 'arguments'
-(args) argv[3] = 'for'
-(args) argv[4] = 'you!'
-(args) argv[5] = null
-(args) end
-args-multiple: exit(0)
-
-TIMEOUT after 61 seconds of wall-clock time - load average: 0.51, 0.39, 0.40
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-DETAILS OF tests/userprog/wait-twice FAILURE:
-
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (wait-twice) begin
-  (child-simple) run
-  child-simple: exit(81)
-  (wait-twice) wait(exec()) = 81
-  (wait-twice) wait(exec()) = -1
-  (wait-twice) end
-  wait-twice: exit(0)
-Differences in `diff -u' format:
-  (wait-twice) begin
-  (child-simple) run
-  child-simple: exit(81)
-  (wait-twice) wait(exec()) = 81
-- (wait-twice) wait(exec()) = -1
-+ (wait-twice) wait(exec()) = 4
-  (wait-twice) end
-  wait-twice: exit(0)
-
-OUTPUT FROM tests/userprog/wait-twice:
-
-Copying tests/userprog/wait-twice into /tmp/ye_PblCsf7.dsk...
-Copying tests/userprog/child-simple into /tmp/ye_PblCsf7.dsk...
-Writing command line to /tmp/u3L6ES7R4g.dsk...
-qemu -hda /tmp/u3L6ES7R4g.dsk -hdb /tmp/xSJmEEUPzd.dsk -hdc /tmp/ye_PblCsf7.dsk -m 4 -net none -nographic -monitor null
-Kernel command line: -q -f put wait-twice put child-simple run wait-twice
-Pintos booting with 4,088 kB RAM...
-373 pages available in kernel pool.
-373 pages available in user pool.
-Calibrating timer...  471,040,000 loops/s.
-hd0:0: detected 137 sector (68 kB) disk, model "QEMU HARDDISK", serial "QM00001"
-hd0:1: detected 4,032 sector (1 MB) disk, model "QEMU HARDDISK", serial "QM00002"
-hd1:0: detected 207 sector (103 kB) disk, model "QEMU HARDDISK", serial "QM00003"
-Formatting file system...done.
-Boot complete.
-Putting 'wait-twice' into the file system...
-Putting 'child-simple' into the file system...
-Executing 'wait-twice':
-(wait-twice) begin
-(child-simple) run
-child-simple: exit(81)
-(wait-twice) wait(exec()) = 81
-(wait-twice) wait(exec()) = 4
-(wait-twice) end
-wait-twice: exit(0)
-Execution of 'wait-twice' complete.
-Timer: 65 ticks
-Thread: 5 idle ticks, 59 kernel ticks, 1 user ticks
-hd0:0: 0 reads, 0 writes
-hd0:1: 156 reads, 424 writes
-hd1:0: 207 reads, 0 writes
-Console: 974 characters output
-Keyboard: 0 keys pressed
-Exception: 0 page faults
-Powering off...
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-DETAILS OF tests/userprog/exec-missing FAILURE:
-
-run: TIMEOUT after 61 seconds of wall-clock time - load average: 0.32, 0.39, 0.40
-
-OUTPUT FROM tests/userprog/exec-missing:
-
-Copying tests/userprog/exec-missing into /tmp/xUuJMIpM8c.dsk...
-Writing command line to /tmp/9fl9K1n6VJ.dsk...
-qemu -hda /tmp/9fl9K1n6VJ.dsk -hdb /tmp/m7AXfYOdUE.dsk -hdc /tmp/xUuJMIpM8c.dsk -m 4 -net none -nographic -monitor null
-Kernel command line: -q -f put exec-missing run exec-missing
-Pintos booting with 4,088 kB RAM...
-373 pages available in kernel pool.
-373 pages available in user pool.
-Calibrating timer...  471,040,000 loops/s.
-hd0:0: detected 137 sector (68 kB) disk, model "QEMU HARDDISK", serial "QM00001"
-hd0:1: detected 4,032 sector (1 MB) disk, model "QEMU HARDDISK", serial "QM00002"
-hd1:0: detected 104 sector (52 kB) disk, model "QEMU HARDDISK", serial "QM00003"
-Formatting file system...done.
-Boot complete.
-Putting 'exec-missing' into the file system...
-Executing 'exec-missing':
-(exec-missing) begin
-load: no-such-file: open failed
-no-such-file: exit(-1)
-
-TIMEOUT after 61 seconds of wall-clock time - load average: 0.32, 0.39, 0.40
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
 DETAILS OF tests/userprog/no-vm/multi-oom FAILURE:
 
-run: TIMEOUT after 4 seconds of wall-clock time - load average: 0.51, 0.43, 0.42
+Kernel panic in run: PANIC at ../../lib/kernel/list.c:84 in list_next(): assertion `is_head (elem) || is_interior (elem)' failed.
+Call stack: 0xc01e1ee4
+Translation of call stack:
+0xc01e1ee4: (unknown)
 
 OUTPUT FROM tests/userprog/no-vm/multi-oom:
 
-Copying tests/userprog/no-vm/multi-oom into /tmp/tZsnk9jhMg.dsk...
-Writing command line to /tmp/BgxroeNbFp.dsk...
-qemu -hda /tmp/BgxroeNbFp.dsk -hdb /tmp/In_ZYgZvyN.dsk -hdc /tmp/tZsnk9jhMg.dsk -m 4 -net none -nographic -monitor null
+Copying tests/userprog/no-vm/multi-oom into /tmp/EVDoxVxAFB.dsk...
+Writing command line to /tmp/4c2zvI4RBc.dsk...
+qemu -hda /tmp/4c2zvI4RBc.dsk -hdb /tmp/NstmakxU5Z.dsk -hdc /tmp/EVDoxVxAFB.dsk -m 4 -net none -nographic -monitor null
 Kernel command line: -q -f put multi-oom run multi-oom
 Pintos booting with 4,088 kB RAM...
 373 pages available in kernel pool.
 373 pages available in user pool.
-Calibrating timer...  471,040,000 loops/s.
+Calibrating timer...  419,020,800 loops/s.
 hd0:0: detected 137 sector (68 kB) disk, model "QEMU HARDDISK", serial "QM00001"
 hd0:1: detected 4,032 sector (1 MB) disk, model "QEMU HARDDISK", serial "QM00002"
 hd1:0: detected 121 sector (60 kB) disk, model "QEMU HARDDISK", serial "QM00003"
@@ -326,25 +203,28 @@ multi-oom: exit(-1)
 multi-oom: exit(-1)
 multi-oom: exit(-1)
 multi-oom: exit(-1)
+(multi-oom) wait returned -1.: FAILED
+multi-oom: exit(1)
 multi-oom: exit(-1)
+multi-oom: exit(1)
 multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-multi-oom: exit(-1)
-
-TIMEOUT after 4 seconds of wall-clock time - load average: 0.51, 0.43, 0.42
+multi-oom: exit(1)
+multi-oom: exit(1)
+multi-oom: exit(1)
+Kernel PANIC at ../../lib/kernel/list.c:84 in list_next(): assertion `is_head (elem) || is_interior (elem)' failed.
+Call stack: 0xc01e1ee4Page fault at 0x54: not present error reading page in kernel context.
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc0105332
+ cr2=00000054 error=00000000
+ eax=00000054 ebx=00000054 ecx=c01e1e10 edx=000003d4
+ esi=c010d320 edi=c010ea09 esp=c010e753 ebp=c01e1ea4
+ cs=0008 ds=0010 es=0010 ss=1ee4
+Kernel PANIC recursion at ../../userprog/exception.c:102 in kill().
+Timer: 159 ticks
+Thread: 30 idle ticks, 53 kernel ticks, 76 user ticks
+hd0:0: 0 reads, 0 writes
+hd0:1: 7924 reads, 250 writes
+hd1:0: 121 reads, 0 writes
+Console: 1729 characters output
+Keyboard: 0 keys pressed
+Exception: 1 page faults
+Powering off...

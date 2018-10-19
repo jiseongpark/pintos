@@ -35,7 +35,7 @@ process_execute (const char *file_name)
   tid_t tid  = 0;
   // struct list_elem *e;
   // struct thread* parent = thread_current();
-  
+
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -135,7 +135,6 @@ process_wait (tid_t child_tid UNUSED)
 
   // printf("!!!!!!!!!!!!!!!!!\n");
   if(parent->child_num == 0){
-    // printf("parent->child_num==0\n");
     return -1;
   }
 
@@ -158,17 +157,16 @@ process_wait (tid_t child_tid UNUSED)
   sema_down(&parent->sema);
 
   if(flag == 0 || flag == 2){
-    // printf("flag==0or2\n");
     return child_tid - 4;
   }
   if(child_tid <= 0){
-    // printf("child_tid<=0\n");
+
     return -1;
   }
   
   // printf("proc_wait : SEMA DOWN BY TID %d\n", thread_current()->tid);
 
-  // printf("normal return\n");
+  
   return parent->exit_status;
 }
 
@@ -183,6 +181,7 @@ process_exit (void)
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
+  if(thread_current()->exec != NULL) filesys_remove(thread_current()->exec);
 
   pd = curr->pagedir;
 
@@ -580,58 +579,88 @@ setup_stack (void **esp, char *file_name)
       else
         palloc_free_page (kpage);
     }
-   char *token, *save_ptr;
-  int argc = 0,i;
 
-  char * copy = malloc(strlen(file_name)+1);
-  strlcpy (copy, file_name, strlen(file_name)+1);
+  /* PJ2 argument stack setting */
+  // printf("start setting argument on stack\n");
+  char *token = NULL;
+  char *save_ptr = NULL;
+  int argc = 0;
+  int i = 0;
 
+  // char * fname = malloc(strlen(file_name)+1);
+  // strlcpy (fname, file_name, strlen(file_name)+1);
+  // printf("$$$$$$$$$$$$$\n");
 
-  for (token = strtok_r (copy, " ", &save_ptr); token != NULL;
-    token = strtok_r (NULL, " ", &save_ptr)){
+  if(file_name[0] != NULL) 
+  {
     argc++;
+    i++;
   }
-
-
-  int *argv = calloc(argc,sizeof(int));
-  for (token = strtok_r (file_name, " ", &save_ptr),i=0; token != NULL;
-    token = strtok_r (NULL, " ", &save_ptr),i++)
-    {
-      *esp -= strlen(token) + 1;
-      memcpy(*esp,token,strlen(token) + 1);
-       
-      argv[i]=*esp;
-    }
-
-  while((int)*esp%4!=0)
+  while(1)
   {
-    *esp-=sizeof(char);
-    char x = 0;
-    memcpy(*esp,&x,sizeof(char));
+    if(file_name[i] == '\0') break;
+    if(file_name[i] == ' ' && file_name[i-1] != ' ') argc++;
+    i++;
   }
 
-  int zero = 0;
+  // printf("setup_stack : argc : %d\n", argc);
 
-  *esp-=sizeof(int);
-  memcpy(*esp,&zero,sizeof(int));
-
-  for(i=argc-1;i>=0;i--)
+  int *argv = calloc(argc,sizeof(uint32_t));
+  i=0;
+  for(token = strtok_r(file_name, " ", &save_ptr); token != NULL;
+    token = strtok_r(NULL, " ", &save_ptr))
   {
-    *esp-=sizeof(int);
-    memcpy(*esp,&argv[i],sizeof(int));
-
+    *esp -= strlen(token) + 1;
+    memcpy(*esp, token, strlen(token) + 1);
+    argv[i]=*esp;
+    i++;
   }
 
-  int pt = *esp;
-  *esp-=sizeof(int);
-  memcpy(*esp,&pt,sizeof(int));
+  // for(i=0; i<argc; i++)
+  //   printf("argv[%d] = %s", i, argv[i]);
 
-  *esp-=sizeof(int);
-  memcpy(*esp,&argc,sizeof(int));
+  // for(i=0;i<argc;i++)
+  //   printf("argument %d has size %d", argv[i], strlen(argv[i]));
 
-  *esp-=sizeof(int);
-  memcpy(*esp,&zero,sizeof(int));
-  free(copy);
+  uint32_t padding = 0;
+
+  while((int)*esp % 4 != 0)
+  {
+    *esp -= 1;
+    memcpy(*esp, &padding, 1);
+  }
+  // printf("!!!!!!!!!!!!!!!!!!!!\n");
+
+  *esp -= 4;
+  memcpy(*esp, &padding, 4);
+
+  // printf("#########\n");
+  // printf("esp : %x(%p)", *esp, esp);
+
+  for(i = argc; i > 0; i--)
+  {
+    *esp -= 4;
+    memcpy(*esp, &argv[i-1], 4);
+  }
+  // for(i=0; i<argc; i++)
+  //   printf("%s(%x)\n", *esp,*esp);
+
+  // printf("aaaaaaaaaaaaaaa\n");
+
+  // for(i=0;i<argc;i++)
+  //   printf("%s", argv[i]);
+
+  uint32_t self = *esp;
+  // printf("self = %x", *esp);
+
+  *esp -= 4;
+  memcpy(*esp, &self, 4);
+  *esp -= 4;
+  memcpy(*esp, &argc, 4);
+  *esp -= 4;
+  memcpy(*esp, &padding, 4);
+
+
   free(argv);
 
   // printf("STACK ESP : %x\n", esp);

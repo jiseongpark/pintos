@@ -42,7 +42,7 @@ static void syscall_handler (struct intr_frame *f UNUSED)
      case SYS_EXIT: /* 1 */
      // printf("STATUS : %d\n", *(p+1));
      // printf("LIST NUM : %d\n", thread_current()->parent->child_num);
-
+     // printf("process_exit by SYS_EXIT\n");
      while(thread_current()->parent->status == THREAD_BLOCKED
      		&& thread_current()->parent->child_num != 1
      		&& thread_current()->tid != 3)
@@ -183,7 +183,7 @@ void syscall_exit(int status)
    thread_current()->exit_status = status;
 
    list_remove(&thread_current()->elem);
-     thread_current()->parent->child_num -= 1;
+   thread_current()->parent->child_num -= 1;
 
    process_exit();
 }
