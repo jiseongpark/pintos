@@ -140,7 +140,7 @@ page_fault (struct intr_frame *f)
   asm ("movl %%cr2, %0" : "=r" (fault_addr));
 
   if(fault_addr == NULL || is_kernel_vaddr(fault_addr)){
-    // printf("FFFFFFFFFFFFFFFFFFF\n");
+    // printf("PAGE FAULT at fault_addr(%p)\n", fault_addr);
     syscall_exit(-1);
   }
 

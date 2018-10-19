@@ -1,7 +1,7 @@
-Copying tests/filesys/base/syn-read into /tmp/4_zMw0q8fY.dsk...
-Copying tests/filesys/base/child-syn-read into /tmp/4_zMw0q8fY.dsk...
-Writing command line to /tmp/GfYLqr5oww.dsk...
-qemu -hda /tmp/GfYLqr5oww.dsk -hdb /tmp/t2_Xyc_wIQ.dsk -hdc /tmp/4_zMw0q8fY.dsk -m 4 -net none -nographic -monitor null
+Copying tests/filesys/base/syn-read into /tmp/6XCKbYBhmb.dsk...
+Copying tests/filesys/base/child-syn-read into /tmp/6XCKbYBhmb.dsk...
+Writing command line to /tmp/Ni2i4nemLz.dsk...
+qemu -hda /tmp/Ni2i4nemLz.dsk -hdb /tmp/NTyBYM4cOH.dsk -hdc /tmp/6XCKbYBhmb.dsk -m 4 -net none -nographic -monitor null
 Kernel command line: -q -f put syn-read put child-syn-read run syn-read
 Pintos booting with 4,088 kB RAM...
 373 pages available in kernel pool.
@@ -24,25 +24,41 @@ Executing 'syn-read':
 (syn-read) exec child 2 of 10: "child-syn-read 1"
 child-syn-read: exit(0)
 (syn-read) exec child 3 of 10: "child-syn-read 2"
+child-syn-read: exit(1)
 (syn-read) exec child 4 of 10: "child-syn-read 3"
 child-syn-read: exit(2)
 (syn-read) exec child 5 of 10: "child-syn-read 4"
+child-syn-read: exit(3)
 (syn-read) exec child 6 of 10: "child-syn-read 5"
 child-syn-read: exit(4)
 (syn-read) exec child 7 of 10: "child-syn-read 6"
+child-syn-read: exit(5)
 (syn-read) exec child 8 of 10: "child-syn-read 7"
 child-syn-read: exit(6)
 (syn-read) exec child 9 of 10: "child-syn-read 8"
+child-syn-read: exit(7)
 (syn-read) exec child 10 of 10: "child-syn-read 9"
 child-syn-read: exit(8)
-syn-read: exit(-1)
+(syn-read) wait for child 1 of 10 returned 0 (expected 0)
+(syn-read) wait for child 2 of 10 returned 1 (expected 1)
+(syn-read) wait for child 3 of 10 returned 2 (expected 2)
+(syn-read) wait for child 4 of 10 returned 3 (expected 3)
+(syn-read) wait for child 5 of 10 returned 4 (expected 4)
+(syn-read) wait for child 6 of 10 returned 5 (expected 5)
+(syn-read) wait for child 7 of 10 returned 6 (expected 6)
+(syn-read) wait for child 8 of 10 returned 7 (expected 7)
+(syn-read) wait for child 9 of 10 returned 8 (expected 8)
+child-syn-read: exit(9)
+(syn-read) wait for child 10 of 10 returned 9 (expected 9)
+(syn-read) end
+syn-read: exit(0)
 Execution of 'syn-read' complete.
-Timer: 127 ticks
-Thread: 36 idle ticks, 53 kernel ticks, 38 user ticks
+Timer: 181 ticks
+Thread: 51 idle ticks, 57 kernel ticks, 73 user ticks
 hd0:0: 0 reads, 0 writes
-hd0:1: 5607 reads, 476 writes
+hd0:1: 11073 reads, 476 writes
 hd1:0: 229 reads, 0 writes
-Console: 1566 characters output
+Console: 2282 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 Powering off...

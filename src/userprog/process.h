@@ -5,6 +5,7 @@
 #include "userprog/exception.h"
 #include <stdbool.h>
 
+
 #define STDIN 0   /* Standard input. */
 #define STDOUT 1  /* Standard output. */
 #define STDERR 2  /* Standard error. */
@@ -15,6 +16,8 @@ struct file_info{
 	struct list_elem elem;   /* List element. */
 	char* opener;            /* process which open the file*/ 
 	struct semaphore sema;   /* semaphore for the file */
+	struct semaphore rw_sema;/* read-write semaphore for the file */
+	int read_count;          /* count the number of readers in CS */
 	int deny_flag            /* deny_flag */
 };
 
