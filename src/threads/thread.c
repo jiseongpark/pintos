@@ -463,6 +463,9 @@ init_thread (struct thread *t, const char *name, int priority)
   t->exec = NULL;
   list_init(&t->child_list);
   sema_init(&t->sema, 0);
+  sema_init(&t->main_sema, 0);
+
+  t->yame = 0;
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
@@ -558,7 +561,7 @@ schedule (void)
 
   if (curr != next)
     prev = switch_threads (curr, next);
-  schedule_tail (prev); 
+  schedule_tail (prev);
 }
 
 /* Returns a tid to use for a new thread. */

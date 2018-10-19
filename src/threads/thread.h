@@ -100,12 +100,14 @@ struct thread
     struct thread *parent;              /* Its parent thread */
     struct list child_list;             /* List of its child thread */
     struct semaphore sema;              /* Its semaphore */
+    struct semaphore main_sema;
     struct file *file;                  /* File that the thread open */ 
     struct intr_frame *interf;          /* Interrupt frame for the thread */
     int exit_status;                    /* Exit status of child thread */
     int child_num;                      /* the number of chlid thread*/
     int executable;                      /* flag for executable file */
     char* exec;                         /*execuatable file for load */
+    int yame;
 #endif
 
     /* Owned by thread.c. */

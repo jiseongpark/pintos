@@ -766,6 +766,7 @@ sub xsystem {
 
 		# Read and print out pipe data.
 		my ($len) = length ($buf);
+		print substr ($buf, $len);
 		waitpid ($pid, 0), last
 		  if sysread ($in, $buf, 4096, $len) <= 0;
 		print substr ($buf, $len);
