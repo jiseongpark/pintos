@@ -14,14 +14,12 @@ struct file_info{
 	struct file *file;       /* Structure of open file. */
 	int fd;                  /* File descriptor. */
 	struct list_elem elem;   /* List element. */
-	char* opener;            /* process which open the file*/ 
-	struct semaphore sema;   /* semaphore for the file */
-	struct semaphore rw_sema;/* read-write semaphore for the file */
-	int read_count;          /* count the number of readers in CS */
-	int deny_flag            /* deny_flag */
+	int opener;            /* process which open the file*/ 
+	int deny_flag;            /* deny_flag */
 };
 
 struct list openfile_list;
+
 
 tid_t process_execute (const char *file_name);
 int process_wait (tid_t);

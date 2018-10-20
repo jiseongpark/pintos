@@ -20,7 +20,9 @@
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
-int flag = 0;
+extern int process_num = 1;
+int flag1 = 1;
+
 
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
@@ -33,36 +35,43 @@ process_execute (const char *file_name)
   char * fn_copy2;
   char * real_file, *save_ptr;
   tid_t tid  = 0;
-  // struct list_elem *e;
-  // struct thread* parent = thread_current();
 
+  if(process_num > 31){
+    return -1;
+  }
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
-  fn_copy2 = palloc_get_page (0);  
   if (fn_copy == NULL)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
-  strlcpy (fn_copy2, file_name, PGSIZE);
   
-  real_file = strtok_r(fn_copy2, " ", &save_ptr);   
   
-  tid = thread_create (real_file, PRI_DEFAULT, start_process, fn_copy);
+  
+  tid = thread_create ("", PRI_DEFAULT, start_process, fn_copy);
   struct thread* child =list_entry(list_rbegin(&thread_current()->child_list), struct thread, elem);
-
+  // printf("PARENT : %d CHILD : %d\n", thread_current()->tid, tid);
   // printf("sema_down(TID %d) sema value = %d\n", child->tid, child->sema.value -1);
+  // if(thread_current()->tid == 1) sema_down(&thread_current()->main_sema);
+  
+  flag1 = 0;
+   
   if(thread_current()->tid == 1) sema_down(&thread_current()->main_sema);
   sema_down(&child->sema);
-
-  palloc_free_page(fn_copy2);
   if (tid == TID_ERROR){
     palloc_free_page (fn_copy);    
   }
+
   
   if(thread_current()->executable == 1){
     // printf("thread_current()->executable==1\n");
     return -1;
   }
+  // if(flag1 == 0){
+  //   printf("FAIL TID : %d\n", tid);
+  // }
+  
+
   // printf("TID %d reached at the end of process_execute\n",thread_current()->tid);
   return tid;
 }
@@ -76,11 +85,8 @@ start_process (void *f_name)
   struct intr_frame if_;
   bool success;
   char* save_ptr;
-  char * temp = (char*)malloc(strlen(f_name) + 1);
   // struct thread* parent = thread_current()->parent;
   
-  strlcpy(temp, f_name, strlen(f_name) + 1);
-  strtok_r(temp, " ", &save_ptr);
 
   /* Initialize interrupt frame and load executable. */
   
@@ -88,12 +94,9 @@ start_process (void *f_name)
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
-  thread_current()->interf = &if_;
-  strlcpy(thread_current()->name, temp, strlen(temp) + 1);
-  free(temp);
-
-
   success = load (file_name, &if_.eip, &if_.esp);
+
+  
     
   
   /* If load failed, quit. */
@@ -101,7 +104,7 @@ start_process (void *f_name)
   // if (!success) {
   //   parent->executable = 1;
   // }
-
+  
   
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -130,6 +133,7 @@ process_wait (tid_t child_tid UNUSED)
   struct list_elem *e; 
   int flag = 0;
   struct thread *child;
+  
   
   // printf("WAIT THREAD : %d\n", thread_current()->tid);
 
@@ -165,8 +169,9 @@ process_wait (tid_t child_tid UNUSED)
   }
   
   // printf("proc_wait : SEMA DOWN BY TID %d\n", thread_current()->tid);
-
+    // if(parent->tid == 1) sema_down(&parent->main_sema);
   
+  // printf("WAIT PARENT : %d STATUS : %d\n",parent->tid, parent->exit_status); 
   return parent->exit_status;
 }
 
@@ -174,19 +179,36 @@ process_wait (tid_t child_tid UNUSED)
 void
 process_exit (void)
 {
-  // printf("EXIT ENTERED : TID %d\n", thread_current()->tid);
+  // printf("EXIT PARENT : TID : %d\n", thread_current()->parent->tid);
   struct thread *curr = thread_current ();
   struct thread *parent = curr->parent;
   uint32_t *pd;
+  struct file_info *of = NULL;
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
-  if(thread_current()->exec != NULL) filesys_remove(thread_current()->exec);
+  
+  
+  int size = list_size(&openfile_list);
+   for(; size > 0; size--)
+   {
+      struct list_elem *e  = list_pop_front(&openfile_list);
+      of = list_entry(e, struct file_info, elem);
+      if(of->opener == thread_current()->tid){
+       file_close(of->file);
+       free(of);
+      }else{
+        list_push_back(&openfile_list, e);
+      }
+   }
+
 
   pd = curr->pagedir;
 
-  curr->parent->exit_status = thread_current()->exit_status;
+  
+    // printf("PD : %x\n", pd);
   // printf("EXIT THREAD : %d\n", thread_current()->tid);
+  // printf("KPAGE : %x\n", thread_current()->kpage);
 
   if (pd != NULL) 
     {
@@ -201,15 +223,22 @@ process_exit (void)
       pagedir_activate (NULL);
       pagedir_destroy (pd);
     }
- 
+  
+  // palloc_free_page(thread_current()->kpage);
+
   free(thread_current()->exec);
- 
+  file_close(thread_current()->file);
   // if(parent->executable==1) sema_up(&thread_current()->sema);
+  // if(parent->tid==1) sema_up(&parent->main_sema);
+  // printf("EXIT VALUE : %d %d\n", parent->sema.value, parent->tid);
+  curr->parent->exit_status = thread_current()->exit_status;
+  // printf("THREAD NUM : %d\n", thread_num);
   if(parent->tid==1) sema_up(&parent->main_sema);
   sema_up(&parent->sema);
-  // printf("sema_up(TID %d) sema value = %d\n", parent->tid, parent->sema.value);
-  
-  thread_exit();  
+
+  process_num--;
+
+  thread_exit(); 
 }
 
 /* Sets up the CPU for running user code in the current
@@ -327,8 +356,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
   fn_copy = (char *)malloc(strlen(file_name) + 1);
   strlcpy(fn_copy, file_name, strlen(file_name) + 1);
   real_file = strtok_r(fn_copy, " ", &save_ptr);
+  strlcpy(thread_current()->name, real_file, 16);
   char * temp = (char*)malloc(sizeof(real_file) + 1);
   strlcpy(temp, real_file, sizeof(real_file) + 1);  
+
   
   /* Open executable file. */
   
@@ -336,14 +367,14 @@ load (const char *file_name, void (**eip) (void), void **esp)
   // printf("2222222222222\n");
  
   file = filesys_open (real_file);
+  
   if (file == NULL) 
     {
-      printf ("load: %s: open failed\n", real_file);
       // printf("NAME1 : %s\n", thread_current()->name);
       parent->executable = 1;
       goto done; 
     }
-  
+  thread_current()->file = file;
 
   /* Read and verify executable header. */
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
@@ -432,7 +463,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
   if(success){
     thread_current()->exec = (char*)malloc(strlen(real_file)+1);
     strlcpy(thread_current()->exec,real_file, strlen(real_file)+1);
-    thread_current()->parent->file = file;
+    process_num++;
+    flag1 = 1;
   }
   
   
@@ -440,14 +472,11 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
   // if(success){
     // if(!list_empty(&thread_current()->sema.waiters)) printf("right before sema_up: thread TID %d will unblocked\n", list_entry(list_begin(&thread_current()->sema.waiters),struct thread,elem)->tid);
-  if(thread_current()->parent->tid==1) sema_up(&thread_current()->parent->main_sema);
+  // if(thread_current()->parent->tid==1) sema_up(&thread_current()->parent->main_sema);
+  // printf("LOAD VALUE : %d %d\n", thread_current()->sema.value, thread_current()->tid);
+ if(thread_current()->parent->tid==1) sema_up(&thread_current()->parent->main_sema);
   sema_up(&thread_current()->sema);
-    // printf("sema_up(TID %d) sema value = %d\n", thread_current()->tid, thread_current()->sema.value);
-  // }
-
-      
   free(fn_copy);
-  // printf("TEMP : %s\n", temp);
   filesys_remove(temp);
   free(temp);
 
@@ -591,18 +620,14 @@ setup_stack (void **esp, char *file_name)
   // strlcpy (fname, file_name, strlen(file_name)+1);
   // printf("$$$$$$$$$$$$$\n");
 
-  if(file_name[0] != NULL) 
-  {
-    argc++;
-    i++;
-  }
-  while(1)
-  {
-    if(file_name[i] == '\0') break;
-    if(file_name[i] == ' ' && file_name[i-1] != ' ') argc++;
-    i++;
-  }
+  char * copy = malloc(strlen(file_name)+1);
+  strlcpy (copy, file_name, strlen(file_name)+1);
 
+
+  for (token = strtok_r (copy, " ", &save_ptr); token != NULL;
+    token = strtok_r (NULL, " ", &save_ptr)){
+    argc++;
+  }
   // printf("setup_stack : argc : %d\n", argc);
 
   int *argv = calloc(argc,sizeof(uint32_t));
@@ -662,6 +687,7 @@ setup_stack (void **esp, char *file_name)
 
 
   free(argv);
+  free(copy);
 
   // printf("STACK ESP : %x\n", esp);
   return success;

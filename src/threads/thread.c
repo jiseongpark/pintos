@@ -301,6 +301,7 @@ thread_exit (void)
   intr_disable ();  
   thread_current ()->status = THREAD_DYING;
   schedule ();
+
   NOT_REACHED ();
 }
 
@@ -464,8 +465,6 @@ init_thread (struct thread *t, const char *name, int priority)
   list_init(&t->child_list);
   sema_init(&t->sema, 0);
   sema_init(&t->main_sema, 0);
-
-  t->yame = 0;
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and

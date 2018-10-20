@@ -111,17 +111,17 @@ main (int argc, char *argv[])
   bool is_at_root = (n == 0);
   if (is_at_root)
     msg ("begin");
-
+  
   /* If -k is passed, crash this process. */
   if (argc > 2 && !strcmp(argv[2], "-k"))
     {
       consume_some_resources_and_die (n);
       NOT_REACHED ();
     }
-
+  
   int howmany = is_at_root ? EXPECTED_REPETITIONS : 1;
   int i, expected_depth = -1;
-
+  
   for (i = 0; i < howmany; i++)
     {
       pid_t child_pid;
@@ -149,6 +149,7 @@ main (int argc, char *argv[])
         return n;
 
       /* Else wait for child to report how deeply it was able to recurse. */
+      // msg("CHILD PID : %d", child_pid);
       int reached_depth = wait (child_pid);
       if (reached_depth == -1)
         fail ("wait returned -1.");
@@ -165,6 +166,7 @@ main (int argc, char *argv[])
     }
 
   consume_some_resources ();
+
 
   if (n == 0)
     {

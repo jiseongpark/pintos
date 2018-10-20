@@ -6,4 +6,4 @@ userprog/exception.o: ../../userprog/exception.c \
   ../../threads/thread.h ../../lib/kernel/list.h ../../threads/synch.h \
   ../../threads/interrupt.h ../../filesys/file.h ../../filesys/off_t.h \
   ../../userprog/syscall.h ../../lib/syscall-nr.h ../../lib/ctype.h \
-  ../../threads/vaddr.h ../../threads/loader.h
+  ../../threads/vaddr.h ../../threads/loader.h ../../userprog/process.h

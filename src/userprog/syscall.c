@@ -40,9 +40,6 @@ static void syscall_handler (struct intr_frame *f UNUSED)
      break;
 
      case SYS_EXIT: /* 1 */
-     // printf("STATUS : %d\n", *(p+1));
-     // printf("LIST NUM : %d\n", thread_current()->parent->child_num);
-     // printf("process_exit by SYS_EXIT\n");
      while(thread_current()->parent->status == THREAD_BLOCKED
      		&& thread_current()->parent->child_num != 1
      		&& thread_current()->tid != 3)
@@ -51,10 +48,8 @@ static void syscall_handler (struct intr_frame *f UNUSED)
         thread_yield();
      }
      if(!is_user_vaddr(*(p+1))){
-        // printf("222222222222222222222222\n");
         syscall_exit(-1);
      }
-     NA:
      syscall_exit(*(p+1));
      break;
      
@@ -92,18 +87,12 @@ static void syscall_handler (struct intr_frame *f UNUSED)
      break;
      
      case SYS_OPEN:  /* 6 */
-     // num++;
-     // printf("%d ", num);
-     // printf("SYS_OPEN : %x\n", *(p+1));
      if(!is_user_vaddr(*(p+1))){
-        // num=0;
-        // printf("66666666\n");
         syscall_exit(-1);
      }
      if(pagedir_get_page(thread_current()->pagedir, *(p+1))==NULL)
      {
         f->eax=0;
-        // printf("777777\n");
         syscall_exit(-1);
         break;
      }
@@ -117,7 +106,6 @@ static void syscall_handler (struct intr_frame *f UNUSED)
      
      case SYS_READ:   /* 8 */
      // printf("BAD READ : %d\n", thread_current()->pagedir);
-     // printf("!!!!!!!!!!!!!!!!\n");
      if(!is_user_vaddr(*(p+2))){
         // printf("8888888888\n");
         syscall_exit(-1);
@@ -160,7 +148,6 @@ static void syscall_handler (struct intr_frame *f UNUSED)
      break;
      
      default:
-  N: 
      printf("ERROR at syscall_handler\n");
   }
 
@@ -195,6 +182,7 @@ int syscall_open(const char * file)
    struct file_info *new_file = malloc(sizeof(struct file_info));
    
    if(file == NULL){
+      free(new_file);
       return -1;
    }
    
@@ -204,7 +192,8 @@ int syscall_open(const char * file)
 
    // file_deny_write(new_file->file);
    
-   if(new_file->file == NULL){   
+   if(new_file->file == NULL){
+      free(new_file);
       return -1;
    }
    else{
@@ -213,14 +202,11 @@ int syscall_open(const char * file)
       // printf("fd : %d\n", fd);
       
       new_file->fd = fd;
-      new_file->opener = thread_current()->name;
+      new_file->opener = thread_current()->tid;
       if(!strcmp(thread_current()->exec, file)){
          new_file->deny_flag = 1;
       }
       
-      sema_init(&new_file->sema, 1);
-      sema_init(&new_file->rw_sema, 1);
-      new_file->read_count = 0;
       list_push_back(&openfile_list, &new_file->elem);
       // printf("list size : %d\n", list_size(&openfile_list));
       // printf("OPEN : %d\n", fd);
@@ -231,7 +217,6 @@ int syscall_open(const char * file)
 bool syscall_create(const char *file, unsigned initial_size)
 {
    if(file==NULL){
-      // printf("bbbbbbbbbbb\n");
       syscall_exit(-1);
    }
    return filesys_create(file, initial_size);
@@ -400,13 +385,12 @@ void syscall_close(int fd)
    if(!flag 
       || fd == 0 
       || fd == 1 
-      || of->opener != thread_current()->name)
+      || of->opener != thread_current()->tid)
    {
-      // printf("eeeeeeeeeeee\n");
       syscall_exit(-1);
    }
-   // free(of->file);
-   filesys_remove(of->file);
    list_remove(e);
+   file_close(of->file);
+   
    free(of);
 }

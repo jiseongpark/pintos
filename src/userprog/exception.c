@@ -6,10 +6,10 @@
 #include "threads/thread.h"
 #include "userprog/syscall.h"
 #include "threads/vaddr.h"
+#include "userprog/process.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
-
 static void kill (struct intr_frame *);
 static void page_fault (struct intr_frame *);
 
@@ -139,9 +139,14 @@ page_fault (struct intr_frame *f)
 
   asm ("movl %%cr2, %0" : "=r" (fault_addr));
 
-  if(fault_addr == NULL || is_kernel_vaddr(fault_addr)){
-    // printf("PAGE FAULT at fault_addr(%p)\n", fault_addr);
+
+
+  
+  if(fault_addr == NULL){
     syscall_exit(-1);
+  }
+  if(is_kernel_vaddr(fault_addr)){
+    syscall_exit(-1); 
   }
 
   /* Turn interrupts back on (they were only off so that we could
