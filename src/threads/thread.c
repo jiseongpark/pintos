@@ -14,6 +14,8 @@
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
+#include "vm/frame.h"
+#include "vm/page.h"
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -177,6 +179,7 @@ thread_create (const char *name, int priority,
   
   /* Allocate thread. */
   t = palloc_get_page (PAL_ZERO);
+
   if (t == NULL){
     return TID_ERROR;
   }
@@ -202,6 +205,7 @@ thread_create (const char *name, int priority,
   
   // enum intr_level old_level = intr_disable();
   list_push_back(&thread_current()->child_list, &t->elem);
+  page_table_init(&t->pt);
   t->parent->child_num += 1;
 
   // sema_up(&t->parent->sema);
@@ -454,7 +458,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
 
-  /*initialize for PJ2*/
+  /* initialize for PJ2 */
   t->pagedir = NULL;
   t->parent = NULL;
   t->file = NULL;
@@ -462,9 +466,12 @@ init_thread (struct thread *t, const char *name, int priority)
   t->child_num = 0;
   t->executable = 0;
   t->exec = NULL;
+
   list_init(&t->child_list);
   sema_init(&t->sema, 0);
   sema_init(&t->main_sema, 0);
+
+  t->esp = PHYS_BASE - 4;
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and

@@ -1,0 +1,32 @@
+Copying tests/vm/mmap-unmap into /tmp/L4UjUT03QO.dsk...
+Copying ../../tests/vm/sample.txt into /tmp/L4UjUT03QO.dsk...
+Writing command line to /tmp/xAstWabsaS.dsk...
+qemu -hda /tmp/xAstWabsaS.dsk -hdb /tmp/lbrvYB9wPd.dsk -hdc /tmp/L4UjUT03QO.dsk -hdd /tmp/W6rAzgHP1w.dsk -m 4 -net none -nographic -monitor null
+Kernel command line: -q -f put mmap-unmap put sample.txt run mmap-unmap
+Pintos booting with 4,088 kB RAM...
+373 pages available in kernel pool.
+373 pages available in user pool.
+Calibrating timer...  419,020,800 loops/s.
+hd0:0: detected 137 sector (68 kB) disk, model "QEMU HARDDISK", serial "QM00001"
+hd0:1: detected 4,032 sector (1 MB) disk, model "QEMU HARDDISK", serial "QM00002"
+hd1:0: detected 109 sector (54 kB) disk, model "QEMU HARDDISK", serial "QM00003"
+hd1:1: detected 8,064 sector (3 MB) disk, model "QEMU HARDDISK", serial "QM00004"
+Formatting file system...done.
+Boot complete.
+Putting 'mmap-unmap' into the file system...
+Putting 'sample.txt' into the file system...
+Executing 'mmap-unmap':
+(mmap-unmap) begin
+(mmap-unmap) open "sample.txt"
+(mmap-unmap) mmap "sample.txt"
+ERROR at syscall_handler
+ERROR at syscall_handler
+Page fault at 0x10000000: not present error reading page in user context.
+mmap-unmap: dying due to interrupt 0x0e (#PF Page-Fault Exception).
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x8048107
+ cr2=10000000 error=00000004
+ eax=00000003 ebx=00000003 ecx=0804bec0 edx=10000000
+ esi=00000000 edi=00000000 esp=bfffffa0 ebp=bfffffb8
+ cs=001b ds=0023 es=0023 ss=0023
+
+TIMEOUT after 6 seconds of wall-clock time - load average: 0.41, 0.27, 0.14

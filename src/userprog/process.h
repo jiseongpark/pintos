@@ -27,6 +27,8 @@ void process_exit (void);
 void process_activate (void);
 void process_exit (void);
 
+void* stack_growth(uint32_t *esp);
+
 #endif /* userprog/process.h */
 
 

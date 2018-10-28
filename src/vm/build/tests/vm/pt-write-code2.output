@@ -1,0 +1,44 @@
+Copying tests/vm/pt-write-code2 into /tmp/E3yH5khe37.dsk...
+Copying ../../tests/vm/sample.txt into /tmp/E3yH5khe37.dsk...
+Writing command line to /tmp/4_wSiJxmR9.dsk...
+qemu -hda /tmp/4_wSiJxmR9.dsk -hdb /tmp/nJO54V4kDC.dsk -hdc /tmp/E3yH5khe37.dsk -hdd /tmp/yXRSmxm7fI.dsk -m 4 -net none -nographic -monitor null
+Kernel command line: -q -f put pt-write-code2 put sample.txt run pt-write-code2
+Pintos booting with 4,088 kB RAM...
+373 pages available in kernel pool.
+373 pages available in user pool.
+Calibrating timer...  419,020,800 loops/s.
+hd0:0: detected 137 sector (68 kB) disk, model "QEMU HARDDISK", serial "QM00001"
+hd0:1: detected 4,032 sector (1 MB) disk, model "QEMU HARDDISK", serial "QM00002"
+hd1:0: detected 107 sector (53 kB) disk, model "QEMU HARDDISK", serial "QM00003"
+hd1:1: detected 8,064 sector (3 MB) disk, model "QEMU HARDDISK", serial "QM00004"
+Formatting file system...done.
+Boot complete.
+Putting 'pt-write-code2' into the file system...
+Putting 'sample.txt' into the file system...
+Executing 'pt-write-code2':
+(pt-write-code2) begin
+(pt-write-code2) open "sample.txt"
+Page fault at 0x80480a0: rights violation error writing page in kernel context.
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc0106b5c
+ cr2=080480a0 error=00000003
+ eax=0000003d ebx=00000001 ecx=c011820c edx=00000000
+ esi=080480a0 edi=080480a0 esp=c011186c ebp=c011bec4
+ cs=0008 ds=0010 es=0010 ss=bfb0
+Kernel PANIC at ../../userprog/exception.c:102 in kill(): Kernel bug - unexpected interrupt in kernel
+Call stack: 0xc011bdb8Page fault at 0x66: not present error reading page in kernel context.
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc0105322
+ cr2=00000066 error=00000000
+ eax=00000066 ebx=00000066 ecx=c011bce4 edx=000003d4
+ esi=c010d4b3 edi=c010ee7d esp=c010e773 ebp=c011bd78
+ cs=0008 ds=0010 es=0010 ss=bdb8
+Kernel PANIC recursion at ../../userprog/exception.c:102 in kill().
+Timer: 58 ticks
+Thread: 4 idle ticks, 53 kernel ticks, 1 user ticks
+hd0:0: 0 reads, 0 writes
+hd0:1: 108 reads, 224 writes
+hd1:0: 107 reads, 0 writes
+hd1:1: 0 reads, 0 writes
+Console: 1753 characters output
+Keyboard: 0 keys pressed
+Exception: 2 page faults
+Powering off...

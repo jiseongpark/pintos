@@ -53,8 +53,10 @@ userprog_SRC += userprog/exception.c	# User exception handler.
 userprog_SRC += userprog/syscall.c	# System call handler.
 userprog_SRC += userprog/gdt.c		# GDT initialization.
 userprog_SRC += userprog/tss.c		# TSS management.
+#userprog_SRC += vm/frame.c          # frame_table (for test)
 
 # No virtual memory code yet.
+vm_SRC = vm/frame.c         # Frame table.
 #vm_SRC = vm/file.c			# Some file.
 
 # Filesystem code.

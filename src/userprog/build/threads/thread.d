@@ -7,4 +7,7 @@ threads/thread.o: ../../threads/thread.c ../../threads/thread.h \
   ../../threads/intr-stubs.h ../../threads/palloc.h \
   ../../threads/switch.h ../../threads/vaddr.h ../../threads/loader.h \
   ../../userprog/process.h ../../threads/thread.h \
-  ../../userprog/exception.h
+  ../../userprog/exception.h ../../vm/frame.h ../../lib/kernel/hash.h \
+  ../../lib/kernel/list.h ../../threads/init.h ../../threads/thread.h \
+  ../../threads/synch.h ../../threads/palloc.h ../../userprog/pagedir.h \
+  ../../threads/vaddr.h

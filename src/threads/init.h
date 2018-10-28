@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "threads/synch.h"
+#include "vm/frame.h"
 
 /* Physical memory size, in 4 kB pages. */
 extern size_t ram_pages;
@@ -16,5 +18,6 @@ extern uint32_t *base_page_dir;
 extern bool power_off_when_done;
 
 void power_off (void) NO_RETURN;
+
 
 #endif /* threads/init.h */

@@ -25,6 +25,7 @@ static void syscall_handler (struct intr_frame *f UNUSED)
 
   int *p = f->esp;
   int i = 0;
+  thread_current()->esp = p;
   // for( ; i<1; i++)
   //    printf("%d : %x\n", i, *(p+i));
   

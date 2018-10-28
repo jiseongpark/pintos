@@ -7,6 +7,7 @@
 #include "userprog/syscall.h"
 #include "threads/vaddr.h"
 #include "userprog/process.h"
+#include "vm/page.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -140,8 +141,35 @@ page_fault (struct intr_frame *f)
   asm ("movl %%cr2, %0" : "=r" (fault_addr));
 
 
+  /* check whether the frame mapped to the page has swapped out */
+  if( page_pte_lookup(fault_addr)->is_swapped_out )
+  {
+    /* exception handling */
+    /* 1) find some frame that occupies PM by eviction policy
+       2) swap out the frame to disk and record it to swap table 
+       3) call install_page to set the frame which is originally mapped with the page
+       4) erase the fte from swap table and record on frame table
+       5) map it with the pte
+       6) return
+    */
+  }
 
+  void *esp = NULL;
+  if((f->error_code & PF_U) != 0) esp = f->esp;
+  else esp = thread_current()->esp;
+
+  printf("access by %s / fault_addr = %x / esp = %x\n", (f->error_code & PF_U) != 0 ? "user" : "kernel", fault_addr, esp);
+  /* check whether the case is stack growth */
+  if(PHYS_BASE-STACK_MAX <= fault_addr 
+    && PHYS_BASE > fault_addr 
+    && (f->esp <= fault_addr 
+      || fault_addr == f->esp - 4 
+      || fault_addr == f->esp - 32))
+  {
+    stack_growth(pg_round_up(fault_addr));
+  }
   
+  /* PJ2 consideration */
   if(fault_addr == NULL){
     syscall_exit(-1);
   }

@@ -17,11 +17,12 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "vm/frame.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 extern int process_num = 1;
-int flag1 = 1;
+
 
 
 /* Starts a new thread running a user program loaded from
@@ -33,6 +34,7 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   char * fn_copy2;
+  FTE *fte_temp;
   char * real_file, *save_ptr;
   tid_t tid  = 0;
 
@@ -42,6 +44,7 @@ process_execute (const char *file_name)
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
+
   if (fn_copy == NULL)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
@@ -50,11 +53,7 @@ process_execute (const char *file_name)
   
   tid = thread_create ("", PRI_DEFAULT, start_process, fn_copy);
   struct thread* child =list_entry(list_rbegin(&thread_current()->child_list), struct thread, elem);
-  // printf("PARENT : %d CHILD : %d\n", thread_current()->tid, tid);
-  // printf("sema_down(TID %d) sema value = %d\n", child->tid, child->sema.value -1);
-  // if(thread_current()->tid == 1) sema_down(&thread_current()->main_sema);
   
-  flag1 = 0;
    
   if(thread_current()->tid == 1) sema_down(&thread_current()->main_sema);
   sema_down(&child->sema);
@@ -64,15 +63,9 @@ process_execute (const char *file_name)
 
   
   if(thread_current()->executable == 1){
-    // printf("thread_current()->executable==1\n");
     return -1;
   }
-  // if(flag1 == 0){
-  //   printf("FAIL TID : %d\n", tid);
-  // }
   
-
-  // printf("TID %d reached at the end of process_execute\n",thread_current()->tid);
   return tid;
 }
 
@@ -101,9 +94,6 @@ start_process (void *f_name)
   
   /* If load failed, quit. */
   palloc_free_page (file_name);
-  // if (!success) {
-  //   parent->executable = 1;
-  // }
   
   
   /* Start the user process by simulating a return from an
@@ -112,7 +102,6 @@ start_process (void *f_name)
      arguments on the stack in the form of a `struct intr_frame',
      we just point the stack pointer (%esp) to our stack frame
      and jump to it. */
-  // printf("SP_NEW : %x\n",if_.esp);
   asm volatile ("movl %0, %%esp; jmp intr_exit" : : "g" (&if_) : "memory");
   NOT_REACHED ();
 }
@@ -134,10 +123,6 @@ process_wait (tid_t child_tid UNUSED)
   int flag = 0;
   struct thread *child;
   
-  
-  // printf("WAIT THREAD : %d\n", thread_current()->tid);
-
-  // printf("!!!!!!!!!!!!!!!!!\n");
   if(parent->child_num == 0){
     return -1;
   }
@@ -156,7 +141,6 @@ process_wait (tid_t child_tid UNUSED)
     }
 
   }
-  // printf("sema_down(TID %d) sema value = %d\n", parent->tid, parent->sema.value -1);
   if(parent->tid == 1) sema_down(&parent->main_sema);
   sema_down(&parent->sema);
 
@@ -168,10 +152,7 @@ process_wait (tid_t child_tid UNUSED)
     return -1;
   }
   
-  // printf("proc_wait : SEMA DOWN BY TID %d\n", thread_current()->tid);
-    // if(parent->tid == 1) sema_down(&parent->main_sema);
   
-  // printf("WAIT PARENT : %d STATUS : %d\n",parent->tid, parent->exit_status); 
   return parent->exit_status;
 }
 
@@ -179,7 +160,6 @@ process_wait (tid_t child_tid UNUSED)
 void
 process_exit (void)
 {
-  // printf("EXIT PARENT : TID : %d\n", thread_current()->parent->tid);
   struct thread *curr = thread_current ();
   struct thread *parent = curr->parent;
   uint32_t *pd;
@@ -205,11 +185,6 @@ process_exit (void)
 
   pd = curr->pagedir;
 
-  
-    // printf("PD : %x\n", pd);
-  // printf("EXIT THREAD : %d\n", thread_current()->tid);
-  // printf("KPAGE : %x\n", thread_current()->kpage);
-
   if (pd != NULL) 
     {
       /* Correct ordering here is crucial.  We must set
@@ -224,15 +199,10 @@ process_exit (void)
       pagedir_destroy (pd);
     }
   
-  // palloc_free_page(thread_current()->kpage);
 
   free(thread_current()->exec);
   file_close(thread_current()->file);
-  // if(parent->executable==1) sema_up(&thread_current()->sema);
-  // if(parent->tid==1) sema_up(&parent->main_sema);
-  // printf("EXIT VALUE : %d %d\n", parent->sema.value, parent->tid);
   curr->parent->exit_status = thread_current()->exit_status;
-  // printf("THREAD NUM : %d\n", thread_num);
   if(parent->tid==1) sema_up(&parent->main_sema);
   sema_up(&parent->sema);
 
@@ -362,15 +332,12 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
   
   /* Open executable file. */
-  
-  // printf("REAL_FILE : %s!\n", real_file);
-  // printf("2222222222222\n");
- 
+  printf("FILE : %s\n", real_file);
   file = filesys_open (real_file);
   
   if (file == NULL) 
     {
-      // printf("NAME1 : %s\n", thread_current()->name);
+      printf("NULL GASAGGI\n");
       parent->executable = 1;
       goto done; 
     }
@@ -394,6 +361,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
    
   file_ofs = ehdr.e_phoff;
+
   for (i = 0; i < ehdr.e_phnum; i++) 
     {
       struct Elf32_Phdr phdr;
@@ -403,6 +371,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       file_seek (file, file_ofs);
 
       if (file_read (file, &phdr, sizeof phdr) != sizeof phdr)
+
         goto done;
       file_ofs += sizeof phdr;
       switch (phdr.p_type) 
@@ -443,13 +412,16 @@ load (const char *file_name, void (**eip) (void), void **esp)
                 }
               if (!load_segment (file, file_page, (void *) mem_page,
                                  read_bytes, zero_bytes, writable))
+
                 goto done;
             }
-          else
+          else{
             goto done;
+          }
           break;
         }
     }
+
   
   /* Set up stack. */
   if (!setup_stack (esp, file_name))
@@ -464,16 +436,12 @@ load (const char *file_name, void (**eip) (void), void **esp)
     thread_current()->exec = (char*)malloc(strlen(real_file)+1);
     strlcpy(thread_current()->exec,real_file, strlen(real_file)+1);
     process_num++;
-    flag1 = 1;
+   
   }
   
   
  done:
 
-  // if(success){
-    // if(!list_empty(&thread_current()->sema.waiters)) printf("right before sema_up: thread TID %d will unblocked\n", list_entry(list_begin(&thread_current()->sema.waiters),struct thread,elem)->tid);
-  // if(thread_current()->parent->tid==1) sema_up(&thread_current()->parent->main_sema);
-  // printf("LOAD VALUE : %d %d\n", thread_current()->sema.value, thread_current()->tid);
  if(thread_current()->parent->tid==1) sema_up(&thread_current()->parent->main_sema);
   sema_up(&thread_current()->sema);
   free(fn_copy);
@@ -554,6 +522,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   ASSERT (pg_ofs (upage) == 0);
   ASSERT (ofs % PGSIZE == 0);
   file_seek (file, ofs);
+
   while (read_bytes > 0 || zero_bytes > 0) 
     {
       /* Do calculate how to fill this page.
@@ -563,14 +532,17 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-      uint8_t *kpage = palloc_get_page (PAL_USER);
-      if (kpage == NULL)
+      uint8_t *kpage = frame_get_fte(upage, PAL_USER);
+      page_map(upage, kpage, writable);
+
+      if(kpage == NULL)
         return false;
 
       /* Load this page. */
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
         {
-          palloc_free_page (kpage);
+          frame_remove_fte(upage);
+          page_remove_pte(upage);
           return false; 
         }
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
@@ -578,7 +550,8 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       /* Add the page to the process's address space. */
       if (!install_page (upage, kpage, writable)) 
         {
-          palloc_free_page (kpage);
+          frame_remove_fte(upage);
+          page_remove_pte(upage);
           return false; 
         }
 
@@ -587,7 +560,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       zero_bytes -= page_zero_bytes;
       upage += PGSIZE;
     }
-  // printf("LOAD_SEGMENT\n");
+
   return true;
 }
 
@@ -598,27 +571,26 @@ setup_stack (void **esp, char *file_name)
 {
   uint8_t *kpage;
   bool success = false;
+  kpage = frame_get_fte(((uint8_t *) PHYS_BASE) - PGSIZE, PAL_USER | PAL_ZERO);
+  page_map(((uint8_t *) PHYS_BASE) - PGSIZE, kpage, false);
+  // kpage = palloc_get_page ();
 
-  kpage = palloc_get_page (PAL_USER | PAL_ZERO);
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
         *esp = PHYS_BASE;
       else
-        palloc_free_page (kpage);
+      {
+        frame_remove_fte(((uint8_t *) PHYS_BASE) - PGSIZE);
+        page_remove_pte(((uint8_t *) PHYS_BASE) - PGSIZE);
+      }
     }
 
-  /* PJ2 argument stack setting */
-  // printf("start setting argument on stack\n");
   char *token = NULL;
   char *save_ptr = NULL;
   int argc = 0;
   int i = 0;
-
-  // char * fname = malloc(strlen(file_name)+1);
-  // strlcpy (fname, file_name, strlen(file_name)+1);
-  // printf("$$$$$$$$$$$$$\n");
 
   char * copy = malloc(strlen(file_name)+1);
   strlcpy (copy, file_name, strlen(file_name)+1);
@@ -628,7 +600,6 @@ setup_stack (void **esp, char *file_name)
     token = strtok_r (NULL, " ", &save_ptr)){
     argc++;
   }
-  // printf("setup_stack : argc : %d\n", argc);
 
   int *argv = calloc(argc,sizeof(uint32_t));
   i=0;
@@ -641,11 +612,6 @@ setup_stack (void **esp, char *file_name)
     i++;
   }
 
-  // for(i=0; i<argc; i++)
-  //   printf("argv[%d] = %s", i, argv[i]);
-
-  // for(i=0;i<argc;i++)
-  //   printf("argument %d has size %d", argv[i], strlen(argv[i]));
 
   uint32_t padding = 0;
 
@@ -654,29 +620,20 @@ setup_stack (void **esp, char *file_name)
     *esp -= 1;
     memcpy(*esp, &padding, 1);
   }
-  // printf("!!!!!!!!!!!!!!!!!!!!\n");
 
   *esp -= 4;
   memcpy(*esp, &padding, 4);
 
-  // printf("#########\n");
-  // printf("esp : %x(%p)", *esp, esp);
+  
 
   for(i = argc; i > 0; i--)
   {
     *esp -= 4;
     memcpy(*esp, &argv[i-1], 4);
   }
-  // for(i=0; i<argc; i++)
-  //   printf("%s(%x)\n", *esp,*esp);
-
-  // printf("aaaaaaaaaaaaaaa\n");
-
-  // for(i=0;i<argc;i++)
-  //   printf("%s", argv[i]);
+  
 
   uint32_t self = *esp;
-  // printf("self = %x", *esp);
 
   *esp -= 4;
   memcpy(*esp, &self, 4);
@@ -689,8 +646,22 @@ setup_stack (void **esp, char *file_name)
   free(argv);
   free(copy);
 
-  // printf("STACK ESP : %x\n", esp);
   return success;
+}
+
+void* stack_growth(uint32_t *esp)
+{
+  uint32_t *kpage;
+  printf("Are you enter?\n");
+  /* find a frame for one additional stack */
+  kpage = frame_get_fte(esp, PAL_USER | PAL_ZERO);
+
+  /* map the frame to page (supplementary) */
+  page_map(esp, kpage, true);
+
+  /* map the frame to page (pintos) */
+  if(pagedir_get_page(thread_current()->pagedir, esp) != NULL) return NULL;
+  pagedir_set_page(thread_current()->pagedir, esp, kpage, true);
 }
 
 /* Adds a mapping from user virtual address UPAGE to kernel
@@ -709,7 +680,6 @@ install_page (void *upage, void *kpage, bool writable)
 
   /* Verify that there's not already a page at that virtual
      address, then map our page there. */
-  // printf("INSTALL_PAGE\n");
   return (pagedir_get_page (t->pagedir, upage) == NULL
           && pagedir_set_page (t->pagedir, upage, kpage, writable));
 }

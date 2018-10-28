@@ -7,6 +7,7 @@
 #include "threads/synch.h"
 #include "threads/interrupt.h"
 #include "filesys/file.h"
+#include <hash.h>
 /* States in a thread's life cycle. */
 enum thread_status
   {
@@ -104,12 +105,15 @@ struct thread
     struct file *file;                  /* File that the thread open */ 
     int exit_status;                    /* Exit status of child thread */
     int child_num;                      /* the number of chlid thread*/
-    int executable;                      /* flag for executable file */
+    int executable;                     /* flag for executable file */
     char* exec;                         /*execuatable file for load */ 
 #endif
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
+
+    struct hash pt;                     /* Page table. */
+    uint32_t *esp;                      /* Saved ESP register value */
   };
 
 
